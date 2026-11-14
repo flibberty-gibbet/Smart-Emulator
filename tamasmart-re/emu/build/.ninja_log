@@ -1,7 +1,0 @@
-# ninja log v7
-22	637	8163248576407894	CMakeFiles/tsmart_core.dir/core/cpu.cpp.obj	848f1ac3763c9e06
-640	927	8163248582590076	libtsmart_core.a	829e61e64e7d2e08
-33	2619	8163248576517898	CMakeFiles/tsmart.dir/sdl/main.cpp.obj	d38fb86323258309
-28	2665	8163248576467913	CMakeFiles/tsmart-run.dir/headless/main.cpp.obj	7be77caee4c6d2c
-2620	2757	8163248602381189	tsmart.exe	7cb50fc88b8db8a0
-2665	2801	8163248602842112	tsmart-run.exe	59f9647ee527dd5e

@@ -30,3 +30,12 @@
 *.exe
 *.out
 *.app
+
+# MAME sources fetched by build scripts (GPL, keep out of the repo)
+tamasmart-re/tools/mame/
+tamasmart-re/emu/test/mame_ref/mame_unsp/
+# binaries built with MAME code
+tamasmart-re/tools/unsp-dasm
+tamasmart-re/emu/test/lockstep
+# cmake build output (has local paths)
+tamasmart-re/emu/build/
