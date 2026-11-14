@@ -1,3 +1,6 @@
+// license:GPL-2.0+
+// copyright-holders:Segher Boessenkool, Ryan Holtz, David Haywood
+// Modified for Smart-Emulator, 2026. Full license: LICENSES/GPL-2.0.txt
 // Framework-free replacements for the parts of MAME's unsp.cpp that the instruction files rely on:
 // reset, flags, stack, FR/DS access, interrupt entry and the single-step loop.
 // Adapted from MAME's src/devices/cpu/unsp/unsp.cpp (GPL-2.0+, Segher Boessenkool, Ryan Holtz, David Haywood).

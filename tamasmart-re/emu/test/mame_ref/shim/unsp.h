@@ -1,3 +1,6 @@
+// license:GPL-2.0+
+// copyright-holders:Segher Boessenkool, Ryan Holtz, David Haywood
+// Modified for Smart-Emulator, 2026. Full license: LICENSES/GPL-2.0.txt
 // Stand-in for MAME's cpu/unsp/unsp.h: same class shape and member names, without the MAME
 // device framework or the recompiler, so unsp_{other,jumps,fxxx,exxx,extended}.cpp compile unchanged.
 // Adapted from MAME (GPL-2.0+, Segher Boessenkool, Ryan Holtz, David Haywood).
