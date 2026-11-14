@@ -1,0 +1,29 @@
+CMD 00 :
+   call_077a22(0x1)
+   call_0779e3(0x1)
+   call_0779a6(0x1)
+   delay(0x32)
+CMD 01 :
+   delay(0x708)
+CMD 11 :
+   delay(0x708)
+CMD b1 : 05 3a 3a
+CMD b2 : 05 3a 3a
+CMD b3 : 05 3a 3a 05 3a 3a
+CMD b4 : 03
+CMD c0 : 62 02 04
+CMD c1 : c0
+CMD c2 : 0d 00
+CMD c3 : 8d 6a
+CMD c4 : 8d ee
+CMD c5 : 12
+CMD e0 : 03 1b 12 11 3f 3a 32 34 2f 2b 30 3a 00 01 02 05
+CMD e1 : 03 1b 12 11 32 2f 2a 2f 2e 2c 35 3f 00 00 01 05
+CMD fc : 8c
+CMD 3a : 05
+CMD 35 : 00
+CMD 36 : 00
+CMD 2a : 00 02 00 81
+CMD 2b : 00 01 00 80
+CMD 29 :
+CMD 2c :

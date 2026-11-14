@@ -1,0 +1,5 @@
+C:/Users/Katu/Documents/GitHub/Smart-Emulator/tamasmart-re/emu/build/CMakeFiles/tsmart_core.dir
+C:/Users/Katu/Documents/GitHub/Smart-Emulator/tamasmart-re/emu/build/CMakeFiles/tsmart-run.dir
+C:/Users/Katu/Documents/GitHub/Smart-Emulator/tamasmart-re/emu/build/CMakeFiles/tsmart.dir
+C:/Users/Katu/Documents/GitHub/Smart-Emulator/tamasmart-re/emu/build/CMakeFiles/edit_cache.dir
+C:/Users/Katu/Documents/GitHub/Smart-Emulator/tamasmart-re/emu/build/CMakeFiles/rebuild_cache.dir

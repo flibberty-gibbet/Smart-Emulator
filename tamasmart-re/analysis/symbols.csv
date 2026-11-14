@@ -1,0 +1,112 @@
+address,name,confidence,notes
+00918e,reset_entry,high,"Reset vector target. Stack=0x27ff, battery ADC check, RAM fill 0xbcdf, copies RAM code, RTC check, .data init, goto main"
+009049,vec_break_stub,high,reti only
+00904a,fiq_handler,medium,"INT_Status3 bit13 -> sub_08c9ef, then TimerF_Ctrl |= 0x8000 (Timer F; likely audio/ComAir timing)"
+00905f,irq0_stub,high,reti only
+009060,irq1_handler,medium,"INT_Status2 bit0: reads ASMICDAC_Data (0x79b4) into RAM 0x0d74 (microphone sample)"
+00906f,irq2_handler,low,"INT_Status1 bit0: sets flag RAM 0x0d95, acks"
+00907c,irq3_stub,high,reti only
+009095,irq4_handler,high,"Timers A/B/C/D overflow (ctrl bit15) + SPU 0x7b85 bit14 -> sub_03b7b1 (sound service)"
+0090da,irq5_handler,high,"TFT/PPU: 0x7063 bit14 -> HB_Ctrl++ ; bit0 (frame) -> frame counter RAM 0x061e++"
+009110,irq6_handler,high,"INT_Status2 bit7 = touch (CTS) -> sets flag; TimeBase C -> clock calibration via TimerH_UpCount; bit10 -> tick RAM 0x0606++"
+009151,irq7_handler,medium,"INT_Status2 bit1 -> sub_07daf7 (RTC alarm/second)"
+009265,rtc_wait_ready,high,polls RTC_Ready (0x79f4) bit0
+00926a,delay_stub_src,high,"11-word delay loop copied to RAM 0x0000 at reset; called as call 0x000000 with count in r1"
+009275,copy_ramcode,high,"copies 0x5c3 words from flash 0x00a000 to RAM 0x0100; caller then does call mr -> 0x0100"
+00a000,ramcode_boot,high,"Runs at RAM 0x0100. Waits Power_State, sets PLL, calibrates SPIFC timing, reads flash JEDEC ID and matches table, sets quad-enable, verifies header + byte-sum checksum"
+07c3c8,main,high,"C main(): hardware init then loop { wait_frame(); watchdog_clear(); game_frame_update(); }"
+0784e5,mem_fill_dma,medium,memset/memcpy style helper using system DMA channel 0
+092626,watchdog_clear,high,writes Watchdog_Clear (0x780b)
+07c507,clock_init,medium,"PLL_Sel, TimeBase C, Timer A; loops on TimerA_UpCount vs 0x4e20 (clock calibration)"
+07d580,rtc_init,high,RTC via indirect addr/data/request registers 0x79f0-0x79f5
+07c57b,gpio_init,high,"port direction/attribute/mux setup, key-change interrupt enables"
+07c83d,audio_dac_init,medium,"CHA DAC + Timer G"
+08e343,touch_init,high,"loads touch tables from 0x091167.., calls cts_hw_init"
+0910f1,cts_hw_init,high,"IOF bits 8-11 as touch pads; CTS_DIV=1, CTS_Ctrl3=1, CTS_Ctrl2=2, CTS_Ctrl1=0x048e"
+08e37a,touch_start_scan,high,starts scanning from channel index 3 down to 0
+08e3a8,touch_irq_flag,high,called from irq6: sets bit 0x1000 in RAM 0x0f17
+08e3af,touch_sample_step,high,"reads CTS_CNT (0x7ac9), accumulates, drops min/max, IIR into RAM 0x0d57+ch, advances channel"
+08e40c,touch_process,high,"per-scan processing of the four capacitive pads: sum of 42 samples less max and min, averaged with the previous scan; press threshold table 0x09117f (0xfc), release 0x09118f (0x6c); debounce 1 scan"
+090e2c,mic_init,medium,microphone ADC setup
+077fbd,lcd_init_wrapper,high,
+077cbb,lcd_init,high,"TFT timing registers + full ST7735S init command sequence (see analysis/lcd_init_sequence.txt)"
+077a8d,lcd_write_cmd,high,"TFT_MemMode_WCmd=byte; wait TFT_Status&0xf0==0; TFT_Ctrl=0xa089 (I80 CMD write)"
+077aa9,lcd_write_data,high,"same with TFT_Ctrl=0xa0a9 (I80 DATA write)"
+077973,delay,medium,busy-wait delay; argument scaled by 200
+0779a6,gpio_set_pin,high,"(pin, level): pin 6 -> IOB_Data bit 6, otherwise IOA_Data bit <pin>"
+08aefa,ppu_init,high,"clears sprite RAM both banks, SControl/Blending/Fade/Palette_Control/PPU_Enable = 0"
+08adb7,ppu_config,high,sets PPU_Enable bits from 10 boolean args
+08ae69,ppu_enable,high,PPU_Enable |= 1
+08ac63,frame_irq_enable,high,TFT_INT_EN |= 1; irq on
+08ad65,frame_irq_clear,high,TFT_INT_CLR = 1
+08aeac,wait_frame,high,"writes WAIT (0x780c)=0x5005 until frame counter 0x061e changes"
+08aed0,set_tft_h_start,low,"TFT_H_Start = clamp(arg,0x14)+3"
+07a588,game_init,medium,"palette, sprites, sound init"
+07a637,game_frame_update,high,called once per frame from main loop
+08e812,button_poll,high,"reads IOB_Data; button = IOB bit 2, active low -> key bit 0x02; state RAM 0x05f2 (held) 0x05f3 (pressed) 0x05f7 (released)"
+08fc74,i2c_init,high,"I2C_Ctrl=0x90, I2C_Clk=0x80, I2C_Debounce=0x10, I2C_MISC=1"
+08fd2b,i2c_write,high,
+08fd93,i2c_read,high,
+0786c9,accel_read_xyz,high,"I2C device 0x30 (7-bit 0x18), registers 0x28-0x2d (LIS2DH-style OUT_X_L..OUT_Z_H)"
+009f33,card_page_program,high,command 0x02 (0x12 with 4-byte addresses)
+08f7d3,spi0_xfer_byte,high,"(byte): write SPI0_TXData 0x7942, wait for SPI0_RXStatus 0x7943 & 7, read SPI0_RXData 0x7944 into RAM 0x0d75; 0 or -1"
+089dc8,spi0_write_block,low,called in 0x100-byte steps by sub_0918d3
+01f046,spifc_manual_cmd,low,only non-RAM user of SPIFC_CMD
+03b7b1,sound_service,low,called from irq4 on SPU interrupt
+07a6ca,scene_step,high,"Per-frame scene state machine. RAM 0x0494 current scene id, 0x0495 requested scene, 0x0496 previous scene, 0x0498 low 3 bits phase (0 init, 1 run, 2 exit). Saves on every scene exit, then checks battery status"
+092536,scene_lookup,high,"Finds a scene id in the 200-entry table at 0x093230 (9 words per entry: id, init, update, exit, extra). See analysis/scene_table.csv"
+038c5a,save_load,high,"Loads slot 0 then slot 1; if both fail, writes defaults to both"
+038cfb,save_now,high,"Writes the save block to both slots"
+038e06,save_write_slot,high,"(slot): 0x127 words from RAM 0x049d plus checksum and inverted checksum (0x129 words = 594 bytes) to linear address 0x807000 + slot*0x800 (flash bytes 0xffc000 / 0xffd000)"
+038d78,save_read_slot,medium,"validates one slot"
+038d5d,save_checksum,medium,
+0906fb,flash_driver_load,medium,"copies the flash driver into RAM 0x0100 before erase/program"
+0905bc,flash_erase_sector,medium,"4 KB erase (command 0x20) through the RAM driver"
+08b595,battery_update,high,"recomputes battery status into RAM 0x05e7 (0 ok, 2 warn -> scene 9030, 3 empty -> scene 9031) from ADC channel 7, using double-precision maths and a 90-sample average"
+08b7f4,battery_status,high,returns RAM 0x05e7
+091dec,battery_adc_start,medium,"ADC_Setup=0x4400, MADC_Ctrl=0x8037; channel 7 is then read every frame at 0x091dd3"
+044f1d,sprite_dma,high,"SPDMA: 0x180 words from RAM 0x0b35 to sprite RAM, then waits for SPDMA_Number to read 0"
+07a91b,scene_request,high,"sets RAM 0x0495"
+091a1f,save_prepare,high,"(wait): TFT_Ctrl=0, optional delay loop of 1,000,000 iterations, sound and PPU off, interrupts off"
+091a4e,save_finish,high,"interrupts on, PPU on, LCD command 0x2c, TFT_Ctrl=0x20cd"
+077fcb,lcd_stream_off,high,TFT_Ctrl = 0
+077fd5,lcd_stream_on,high,"LCD command 0x2c then TFT_Ctrl = 0x20cd"
+0607e5,fade_start,medium,"(type, level, direction, step, ?): packs a fade request into RAM 0x0b27/0x0b28; the palette is then recomputed each frame"
+08e933,key_held,high,"(mask): returns mask & RAM 0x05f2 when input is enabled (RAM 0x05f1 bit 0)"
+08e921,key_pressed,high,"(mask): same for newly pressed keys, RAM 0x05f3"
+00ee8c,logo_start_wait_object,low,"(0x3c, 0x80, ...): returns a handle the boot logo waits on via 0x08a246; probably starts the start-up jingle"
+08a246,wait_object_done,low,"(handle): non-zero when finished"
+08f796,spi0_init,high,"(mode): SPI0_Ctrl=0x0800, IOC bit 12 (card chip select) output high, SPI0_Ctrl=(mode&7)|0x8000, SPI0_Misc|=0x100"
+08f7b8,card_cs_high,high,IOC_Buffer |= 0x1000: deselect the card
+08f7bf,card_cs_low,high,IOC_Buffer &= ~0x1000: select the card
+08f7f5,spi0_write_block,high,"8 bytes at a time, waits for SPI0_Misc 0x7945 bit 3 (receive FIFO full) and drains it"
+08f849,spi0_read_block,medium,"sends zeros and collects the replies, same FIFO handling"
+009da9,card_nor_init,high,(mode=2): spi0_init for an SPI NOR SmaCard
+009db9,card_write_enable,high,command 0x06
+009dd5,card_read_jedec,high,"command 0x9f, 3 bytes; capacity byte 0x19/0x1a/0x20/0x1b/0x21 selects 4-byte addressing (RAM 0x0d87)"
+009e15,card_read_status,high,command 0x05
+089fa4,card_detect_boot,high,"IOC bit 9 input with pull-up; low = card present (unpowered card pulls the detect line down). Only called once, from main"
+089f74,card_power_on,high,"IOC bit 10 low, bits 11-14 high, then waits for bit 12 (as input) to read high"
+089f45,card_power_off,high,"SPI0 off, bit 10 high, bits 11-14 low, waits for bit 12 to read low"
+09018a,sd_card_init,medium,"(retries): SD/MMC SPI-mode initialisation (CMD0 = 0x40 ...). Tried first at boot when a card is detected; success sets card type 1 (RAM 0x0491), failure means an SPI NOR SmaCard (type 2)"
+0913ed,card_slot_enable,high,"(on): on = IOC bit 10 output low (card power), bit 9 input pull-down, IOC_Mux |= 0x88, RAM 0x0606 = 0, [0x78b2] = 0xe000; off = reverse"
+091481,card_present,high,IOC_Data bit 9 high = card present (the detect line is tied to the powered card's supply)
+00c19a,scene_ffe2_init,high,TamaSma Card scene (DOWNLOAD / CURRENT CARD)
+07d70b,rtc_read_counter,high,48-bit counter from RTC registers 0x30-0x35 (32768 Hz ticks; seconds = value >> 15)
+07d816,rtc_set_counter,high,writes RTC registers 0x10-0x15
+07d6e9,rtc_read_reg,high,(reg): indirect read through 0x79f1/0x79f3/0x79f5
+07d662,rtc_write_reg,high,"(reg, value): indirect write through 0x79f1/0x79f2/0x79f3"
+07daf7,rtc_irq,high,reads RTC status register 0x40; second (bit 0) or alarm (bit 1) sets RAM 0x0d56; acknowledges by writing 0xf0
+07da93,rtc_irq_enable,medium,"(mode): clears status, writes RTC interrupt enable register 0x50 = 5 or 1"
+009299,soc_sleep,high,"IRQs off, copies a routine to RAM and runs it: [0x780d] = 0x500a stops the clocks until a wake-up event"
+077c9f,delay_ms,medium,(n): n x 0xc1c iterations of watchdog_clear
+0201d2,input_events_update,high,"(list): runs the handler (table 0x095889, indexed by the type in bits 0-5) of each of up to 27 two-word event entries; bit 6 = fired"
+02023a,input_event_fired,high,"(list, type): non-zero when the event of that type fired this frame"
+02005c,touch_frame_update,high,"builds RAM 0x0609: bits 0-3 pads held (1 top-left, 2 bottom-left, 4 bottom-right, 8 top-right via table 0x095885), 4-7 previous, 8-11 pressed, 12-15 released"
+020a50,input_tap_tl,high,event 6: top-left pad held for 12 frames. 020adc/020b68/020bf4 = events 7-9 for the other pads
+020c80,input_swipe_left,high,"event 0x0a: press on the right half, release, left half touched within 10 frames"
+020d45,input_swipe_right,high,event 0x0b: left half then right half
+020e0a,input_swipe_up,high,event 0x0c: bottom half then top half. The menu uses it for the next page
+020ecf,input_swipe_down,high,event 0x0d: top half then bottom half. Menu: previous page
+0500fe,menu_update_state,medium,main menu (scene 0x1400) state machine; page number at context+0x75
+03f698,sleep_scene_update,medium,"scene 0x9000: waits for the button to be released, powers peripherals down, arms key-change wake-up on port B bit 2 and the RTC, calls soc_sleep, then decides whether to wake fully"
